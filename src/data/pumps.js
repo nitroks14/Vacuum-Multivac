@@ -1,16 +1,17 @@
 /**
  * Base de données pompes & Roots
- * Multivac – Calculateur vide
- *
- * Les débits sont exprimés en m³/s
- * La pression p est en mbar absolu
+ * Unités :
+ * - pression p : mbar absolu
+ * - débit : m³/s
  */
 
 /* ────────────────────────────── */
-/* POMPES PRIMAIRES (si source = pompe locale) */
+/* POMPES PRIMAIRES */
 /* ────────────────────────────── */
 
 export const primaryPumpModels = {
+  /* ───── Busch R5 (pompes à huile) ───── */
+
   "Busch R5 RA 0025": {
     type: "rotative",
     workingRange: [1000, 5],
@@ -69,121 +70,91 @@ export const primaryPumpModels = {
     type: "rotative",
     workingRange: [1000, 5],
     flow: (p) => (p > 100 ? 0.195 : p > 10 ? 0.14 : 0.08)
-  }
-}
-
-/* ────────────────────────────── */
-/* ROOTS (accélérateurs de débit) */
-/* ────────────────────────────── */
-
-export const rootsModels = {
-  "Aucune": {
-    enabled: false,
-    threshold: 0,
-    effectiveRange: null,
-    gain: () => 1
   },
 
-  "Atlas Copco DRT1000": {
-    enabled: true,
-    manufacturer: "Atlas Copco",
-    nominalFlow: 1000, // m³/h
-    threshold: null, // recherché par IA Gemini
-    fallbackThreshold: 100, // mbar si IA échoue
-    effectiveRange: [100, 40],
-    gain: (p) => {
-      if (p > 100) return 1
-      if (p > 40) return 1 + (100 - p) / 60 * 1.5
-      return 2.5
-    }
-  },
-
-  "Atlas Copco DRT2000": {
-    enabled: true,
-    manufacturer: "Atlas Copco",
-    nominalFlow: 2000,
-    threshold: null,
-    fallbackThreshold: 100,
-    effectiveRange: [100, 40],
-    gain: (p) => {
-      if (p > 100) return 1
-      if (p > 40) return 1 + (100 - p) / 60 * 2.5
-      return 3.5
-    }
-  },
-
-  "Busch PANDA WV 1000": {
-    enabled: true,
-    manufacturer: "Busch",
-    nominalFlow: 1000,
-    threshold: null,
-    fallbackThreshold: 100,
-    effectiveRange: [100, 40],
-    gain: (p) => {
-      if (p > 100) return 1
-      if (p > 40) return 1 + (100 - p) / 60 * 1.7
-      return 2.7
-    }
-  },
-
-  "Busch PANDA WV 2000": {
-    enabled: true,
-    manufacturer: "Busch",
-    nominalFlow: 2000,
-    threshold: null,
-    fallbackThreshold: 100,
-    effectiveRange: [100, 40],
-    gain: (p) => {
-      if (p > 100) return 1
-      if (p > 40) return 1 + (100 - p) / 60 * 2.8
-      return 3.8
-    }
-  }
-}
-
-/* ────────────────────────────── */
-/* POMPES SÈCHES À VIS – BUSCH COBRA */
-/* ────────────────────────────── */
-
-export const primaryPumpModels = {
-  /* … Busch R5 déjà existantes … */
+  /* ───── Busch COBRA (pompes sèches à vis) ───── */
 
   "Busch COBRA NC 0300": {
     type: "dry-screw",
-    manufacturer: "Busch",
-    nominalFlow: 300, // m³/h
     workingRange: [1000, 0.1],
     flow: (p) => {
-      if (p > 100) return 0.083   // ≈ 300 m³/h
-      if (p > 40)  return 0.075
-      if (p > 10)  return 0.060
-      return 0.045
+      if (p > 100) return 0.083;
+      if (p > 40) return 0.075;
+      if (p > 10) return 0.060;
+      return 0.045;
     }
   },
 
   "Busch COBRA NC 0400": {
     type: "dry-screw",
-    manufacturer: "Busch",
-    nominalFlow: 400,
     workingRange: [1000, 0.1],
     flow: (p) => {
-      if (p > 100) return 0.11    // ≈ 400 m³/h
-      if (p > 40)  return 0.100
-      if (p > 10)  return 0.080
-      return 0.060
+      if (p > 100) return 0.11;
+      if (p > 40) return 0.10;
+      if (p > 10) return 0.08;
+      return 0.06;
     }
   },
 
   "Busch COBRA NC 0450": {
     type: "dry-screw",
-    manufacturer: "Busch",
-    nominalFlow: 450,
     workingRange: [1000, 0.1],
     flow: (p) => {
-      if (p > 100) return 0.125   // ≈ 450 m³/h
-      if (p > 40)  return 0.115
-      if (p > 10)  return 0.095
-      return 0.070
+      if (p > 100) return 0.125;
+      if (p > 40) return 0.115;
+      if (p > 10) return 0.095;
+      return 0.07;
     }
   }
-}
+};
+
+/* ────────────────────────────── */
+/* ROOTS */
+/* ────────────────────────────── */
+
+export const rootsModels = {
+  "Aucune": {
+    enabled: false,
+    gain: () => 1
+  },
+
+  "Atlas Copco DRT1000": {
+    enabled: true,
+    fallbackThreshold: 100,
+    gain: (p) => {
+      if (p > 100) return 1;
+      if (p > 40) return 1 + ((100 - p) / 60) * 1.5;
+      return 2.5;
+    }
+  },
+
+  "Atlas Copco DRT2000": {
+    enabled: true,
+    fallbackThreshold: 100,
+    gain: (p) => {
+      if (p > 100) return 1;
+      if (p > 40) return 1 + ((100 - p) / 60) * 2.5;
+      return 3.5;
+    }
+  },
+
+  "Busch PANDA WV 1000": {
+    enabled: true,
+    fallbackThreshold: 100,
+    gain: (p) => {
+      if (p > 100) return 1;
+      if (p > 40) return 1 + ((100 - p) / 60) * 1.7;
+      return 2.7;
+    }
+  },
+
+  "Busch PANDA WV 2000": {
+    enabled: true,
+    fallbackThreshold: 100,
+    gain: (p) => {
+      if (p > 100) return 1;
+      if (p > 40) return 1 + ((100 - p) / 60) * 2.8;
+      return 3.8;
+    }
+  }
+};
